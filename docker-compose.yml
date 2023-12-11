@@ -1,0 +1,30 @@
+# Docker Compose configuration for running a Python Django app
+
+# Specifies the Docker Compose file version
+version: "3.9"
+
+# Begins the definition of services within the Docker Compose file
+services:
+
+#Defines a service named recipe_app
+  recipe_app:
+
+  # Specifies the build configuration for the service.
+    build:
+
+    # Sets the build context to the current directory.
+      context: .
+      args:
+       - DEV=true
+
+    # Maps port 8000 from the container to port 8000 on the host
+    ports:
+      - "8000:8000"
+
+    # Mounts the ./recipe_app directory from the host to the /recipe_app directory in the container
+    volumes:
+      - ./recipe_app:/recipe_app
+
+    #  Sets the command to run within the container, which starts the Django development server.
+    command: >
+      sh -c "python3 manage.py runserver 0.0.0.0:8000"
