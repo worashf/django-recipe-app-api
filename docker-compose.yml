@@ -6,16 +6,16 @@ version: "3.9"
 # Begins the definition of services within the Docker Compose file
 services:
 
-#Defines a service named recipe_app
+  # Defines a service named recipe_app
   recipe_app:
 
-  # Specifies the build configuration for the service.
+    # Specifies the build configuration for the service.
     build:
 
-    # Sets the build context to the current directory.
+      # Sets the build context to the current directory.
       context: .
       args:
-       - DEV=true
+        - DEV=true
 
     # Maps port 8000 from the container to port 8000 on the host
     ports:
@@ -25,6 +25,28 @@ services:
     volumes:
       - ./recipe_app:/recipe_app
 
-    #  Sets the command to run within the container, which starts the Django development server.
-    command: >
-      sh -c "python3 manage.py runserver 0.0.0.0:8000"
+    # Sets the command to run within the container, which starts the Django development server.
+    command: sh -c "python3 manage.py wait_for_db &&
+              python3 manage.py migrate &&
+              python3 manage.py runserver 0.0.0.0:8000"
+
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=devpass
+
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine3.19
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=devpass
+
+volumes:
+  dev-db-data:

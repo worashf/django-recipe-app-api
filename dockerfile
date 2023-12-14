@@ -31,6 +31,10 @@ RUN python -m venv /py
 # Upgrades pip within the virtual environment. 
 RUN /py/bin/pip install --upgrade pip
 
+# Install required packages for PostgreSQL
+RUN apk --update --no-cache add postgresql-client \
+    && apk --update --no-cache add --virtual .temp-build-deps build-base postgresql-dev musl-dev 
+ 
 # Installs Python packages listed in /tmp/requirements.txt into the virtual environment.
 RUN /py/bin/pip install -r /tmp/requirements.txt
 
@@ -41,6 +45,9 @@ RUN if [ "$DEV" = "true" ]; then \
 
 # Removes the /tmp directory to clean up
 RUN rm -rf /tmp
+
+ # Removes unnecessary temporary packages
+RUN apk del .temp-build-deps 
 
 # Adds a new system user named django-recipe-app-user without a password and without creating a home directory
 RUN adduser --disabled-password --no-create-home django-recipe-app-user
